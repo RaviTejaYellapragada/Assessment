@@ -4,6 +4,8 @@ import * as express from "express";
 import * as bodyParser from "body-parser";
 import { Request, Response } from "express";
 import { Routes } from "./routes";
+import { Teacher } from "./entity/teachers";
+import { Student } from "./entity/students";
 
 createConnection().then(async connection => {
 
@@ -31,6 +33,34 @@ createConnection().then(async connection => {
 
     // start express server
     app.listen(3000);
+
+    // Added default records when creating db
+    const teachers = await connection.manager.find(Teacher);
+    const students = await connection.manager.find(Student);
+
+    if(!teachers.length) {
+        await connection.manager
+        .createQueryBuilder()
+        .insert()
+        .into(Teacher)
+        .values([
+            { teacherEmail: "teacher11@test.com" }, 
+            { teacherEmail: "teacher22@test.com" }
+         ])
+        .execute();
+    }
+    
+    if(!students.length) {
+        await connection.manager
+        .createQueryBuilder()
+        .insert()
+        .into(Student)
+        .values([
+            { studentEmail: "student1@test.com", isStudentSuspended: true }, 
+            { studentEmail: "student8@test.com", isStudentSuspended: false }
+         ])
+        .execute();
+    }
 
     console.log("Express server has started on port 3000. Open http://localhost:3000/ to see results");
 
